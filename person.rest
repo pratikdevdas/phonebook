@@ -1,12 +1,16 @@
-ṆGET http://localhost:3001/api/persons/y45y4y45
+GET http://localhost:3001/api/persons/y45y4y45
+
+###
+GET http://localhost:3001/api/users/
 
 ###
 POST http://localhost:3001/api/persons/ 
 content-type: application/json
 
 {
-    "name": "samplrefefrefrgegegvgnadsczcdcmee",
-    "number": "4379r79379"
+    "name": "Gaze Rasterize",
+    "number": "45731214564645",
+    "userId": "61bdc4ef2a5c5d4dd4682a27"
 }
 
 ###
@@ -20,4 +24,15 @@ content-type: application/json
 {
     "name": "samplrefefrefrgegegvgnadsczcdcmee",
     "number": "4379r793fvvcdsgg79"
+}
+
+###
+POST http://localhost:3001/api/users/ 
+content-type: application/json
+
+{
+    "persons": [],
+    "username": "root",
+    "name": "Superuser",
+    "password": "salainen"
 }
