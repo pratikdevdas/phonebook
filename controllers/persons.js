@@ -1,31 +1,26 @@
 const personRouter = require('express').Router()
 const Person = require('../models/person')
+const User = require('../models/user')
 
-personRouter.get('/hw', (request, response) => {
-  response.send('<h1>Hello World!</h1>')
+personRouter.get('/hw', async(request, response) => {
+  await response.send('<h1>Hello World!</h1>')
 })
 
 //fetching all resources mongo db
-personRouter.get('/', (request, response) => {
-  Person.find({}).then(notes => {
-    response.json(notes)
-  })
+personRouter.get('/', async(request, response) => {
+  const person = await Person.find({}).populate('user')
+  response.json(person)
 })
 
+
 //fetching a single resource
-personRouter.get('/:id', (request, response) => {
-  Person.findById(request.params.id)
-    .then(person => {
-      if (person) {
-        response.json(person)
-      } else {
-        response.status(404).end()
-      }
-    })
-    .catch(error => {
-      console.log(error)
-      response.status(400).send({ error:'malformed error' })
-    })
+personRouter.get('/:id', async(request, response) => {
+  const person = await Person.findById(request.params.id)
+  if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
 })
 
 //fetching local host info
@@ -35,15 +30,16 @@ personRouter.get('/info', (request, response) => {
   console.log(response.send) })
 
 //fetching delete resource
-personRouter.delete('/:id', (request, response,next) => {
-  Person.findByIdAndRemove(request.params.id)
-    .then(result => {response.status(204).end()})
-    .catch(error => next(error))
+personRouter.delete('/:id', async(request, response) => {
+  await Person.findByIdAndRemove(request.params.id)
+  response.status(204).end()
 })
 
 //receiving data adding new note
-personRouter.post('/', (request, response, next) => {
+personRouter.post('/', async (request, response) => {
   const body = request.body
+  
+  const user = await User.findById(body.userId)
   if (!body.name) {
     return response.status(400).json({
       error: 'content missing'
@@ -57,12 +53,13 @@ personRouter.post('/', (request, response, next) => {
   const addperson = new Person({
     name: body.name,
     number: body.number,
-
+    user: user._id
   })
 
-  addperson.save().then(savePerson => {
-    response.json(savePerson.toJSON())})
-    .catch(error => next(error))
+  const savePerson = await addperson.save()
+  user.persons = user.persons.concat(savePerson._id)
+  await user.save()
+      response.json(savePerson)
 })
 
 personRouter.put('/:id', (request, response, next) => {
@@ -77,6 +74,5 @@ personRouter.put('/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
-
 
 module.exports = personRouter

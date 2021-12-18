@@ -14,6 +14,10 @@ const personSchema = new mongoose.Schema({
     minlength: 8,
     required: true,
     unique: true
+  },
+  user:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'User'
   }
 })
 // Apply the uniqueValidator plugin to userSchema.
