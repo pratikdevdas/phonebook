@@ -1,4 +1,4 @@
-GET http://localhost:3001/api/persons/y45y4y45
+ṆGET http://localhost:3001/api/persons/y45y4y45
 
 ###
 POST http://localhost:3001/api/persons/ 
