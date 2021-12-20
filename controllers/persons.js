@@ -1,6 +1,7 @@
 const personRouter = require('express').Router()
 const Person = require('../models/person')
 const User = require('../models/user')
+const jwt = require('jsonwebtoken')
 
 personRouter.get('/hw', async(request, response) => {
   await response.send('<h1>Hello World!</h1>')
@@ -35,11 +36,24 @@ personRouter.delete('/:id', async(request, response) => {
   response.status(204).end()
 })
 
+// helper function to extract token
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if(authorization && authorization.toLowerCase().startsWith('bearer ')){
+    return authorization.substring(7)
+  }
+  return null
+}
+
 //receiving data adding new note
 personRouter.post('/', async (request, response) => {
   const body = request.body
-  
-  const user = await User.findById(body.userId)
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  if(!token || !decodedToken.id) {
+    return response.status(401).json({ error:'token missing or invalid' })
+  }
+  const user = await User.findById(decodedToken.id)
   if (!body.name) {
     return response.status(400).json({
       error: 'content missing'
@@ -59,7 +73,7 @@ personRouter.post('/', async (request, response) => {
   const savePerson = await addperson.save()
   user.persons = user.persons.concat(savePerson._id)
   await user.save()
-      response.json(savePerson)
+  response.json(savePerson)
 })
 
 personRouter.put('/:id', (request, response, next) => {
