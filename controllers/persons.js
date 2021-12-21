@@ -30,12 +30,6 @@ personRouter.get('/info', (request, response) => {
   Person.find({}).then(persons => { response.send('<div>Phonebook has info for '+persons.length+' people</div>'+date)})
   console.log(response.send) })
 
-//fetching delete resource
-personRouter.delete('/:id', async(request, response) => {
-  await Person.findByIdAndRemove(request.params.id)
-  response.status(204).end()
-})
-
 // helper function to extract token
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
@@ -44,6 +38,29 @@ const getTokenFrom = request => {
   }
   return null
 }
+
+/* I am not extracting token extraction and userextraction to
+middle ware in this app whereas in bloglist backend i did */
+//fetching delete resource
+personRouter.delete('/:id', async(request, response) => {
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+
+  if(!token || !decodedToken.id) {
+    return response.status(401).json({ error:'token missing or invalid' })
+  }
+  // fetching users
+  const user = await User.findById(decodedToken.id)
+  // fetching blog
+  const person = await Person.findById(request.params.id)
+  // checking if person belong to user; if true executes
+  const checkId = person.user._id
+  if(checkId.toString() === user._id.toString()){
+    await Person.findByIdAndRemove(checkId.toString())
+    response.status(204).end()
+  }
+})
+
 
 //receiving data adding new note
 personRouter.post('/', async (request, response) => {
@@ -76,17 +93,16 @@ personRouter.post('/', async (request, response) => {
   response.json(savePerson)
 })
 
-personRouter.put('/:id', (request, response, next) => {
+personRouter.put('/:id', async(request, response) => {
   const body = request.body
+
   const person = {
     name: body.name,
     number: body.number,
   }
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then(updatePerson => {
-      response.json(updatePerson)
-    })
-    .catch(error => next(error))
+
+  const updateContact = await Person.findByIdAndUpdate(request.params.id,person)
+  response.json(updateContact.toJSON())
 })
 
 module.exports = personRouter
