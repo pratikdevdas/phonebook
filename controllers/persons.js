@@ -56,11 +56,10 @@ personRouter.delete('/:id', async(request, response) => {
   // checking if person belong to user; if true executes
   const checkId = person.user._id
   if(checkId.toString() === user._id.toString()){
-    await Person.findByIdAndRemove(checkId.toString())
+    await Person.findByIdAndRemove(person._id.toString())
     response.status(204).end()
   }
 })
-
 
 //receiving data adding new note
 personRouter.post('/', async (request, response) => {
