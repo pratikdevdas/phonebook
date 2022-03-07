@@ -30,7 +30,7 @@ personRouter.get('/check', async(request, response) => {
     return response.status(401).json({
       error: 'token invalid or missing'
     })
-  } kjl
+  }
   // console.log(decodedToken.id)
 
   const user = await User.findById(decodedToken.id)
