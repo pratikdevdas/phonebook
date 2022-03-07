@@ -7,3 +7,9 @@ content-type: application/json
     "name": "Superuser",
     "password": "red"
 }
+
+###
+GET http://localhost:8001/api/users/61dab82eceaa9097855789aa
+
+###
+GET http://localhost:8001/api/users/61c5b7a13dc9f1687837b0dc

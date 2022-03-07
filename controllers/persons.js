@@ -7,23 +7,6 @@ personRouter.get('/hw', async(request, response) => {
   await response.send('<h1>Hello World!</h1>')
 })
 
-//fetching all resources mongo db
-personRouter.get('/', async(request, response) => {
-  const person = await Person.find({}).populate('user')
-  response.json(person)
-})
-
-
-//fetching a single resource
-personRouter.get('/:id', async(request, response) => {
-  const person = await Person.findById(request.params.id)
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
-})
-
 //fetching local host info
 personRouter.get('/info', (request, response) => {
   const date = new Date()
@@ -38,9 +21,43 @@ const getTokenFrom = request => {
   }
   return null
 }
+//fetching all persons mongo db
+personRouter.get('/check', async(request, response) => {
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+
+  if(!token || !decodedToken.id){
+    return response.status(401).json({
+      error: 'token invalid or missing'
+    })
+  } kjl
+  // console.log(decodedToken.id)
+
+  const user = await User.findById(decodedToken.id)
+  // gets person by user id
+  const person = await Person.find( { user: user._id } )
+  response.send(person)
+
+})
+
+//fetching all persons mongo db
+personRouter.get('/', async(request, response) => {
+  const person = await Person.find({})
+  response.json(person)
+})
+
+//fetching a single resource
+personRouter.get('/:id', async(request, response) => {
+  const person = await Person.findById(request.params.id)
+  if (person) {
+    response.json(person)
+  } else {
+    response.status(404).end()
+  }
+})
 
 /* I am not extracting token extraction and userextraction to
-middle ware in this app whereas in bloglist backend i did */
+middleware in this app whereas in bloglist backend i did */
 //fetching delete resource
 personRouter.delete('/:id', async(request, response) => {
   const token = getTokenFrom(request)
